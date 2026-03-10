@@ -333,7 +333,7 @@ const PageOverview = ({ deptFilter, onDeptChange, liveHeadcount }) => {
 
       <DeptFilter selected={deptFilter} onChange={onDeptChange} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 16 }}>
         <Panel>
           <PanelTitle>Headcount by Department</PanelTitle>
           <ResponsiveContainer width="100%" height={220}>
@@ -363,6 +363,27 @@ const PageOverview = ({ deptFilter, onDeptChange, liveHeadcount }) => {
               <div key={g.name} style={{ textAlign: "center" }}>
                 <div style={{ color: g.color, fontWeight: 700, fontSize: 15 }}>{((g.value/1631)*100).toFixed(0)}%</div>
                 <div style={{ color: C.textDim, fontSize: 10 }}>{g.name.split(" ")[0]}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+        <Panel>
+          <PanelTitle>Firm Snapshot</PanelTitle>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+            {[
+              { label: "Total Headcount",    value: totalActive.toLocaleString(), color: C.accent },
+              { label: "Departments",        value: "8",         color: C.blueL },
+              { label: "Seniority Levels",   value: "9",         color: C.green },
+              { label: "Global Offices",     value: "7",         color: C.purple },
+              { label: "Attrition Rate",     value: "17.4%",     color: C.red },
+              { label: "Avg Performance",    value: "3.85 / 5",  color: C.green },
+              { label: "Avg Tenure",         value: "3.53 yrs",  color: C.blueL },
+              { label: "Avg Base Salary",    value: "$143K",     color: C.accent },
+            ].map(s => (
+              <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "6px 0", borderBottom: `1px solid ${C.border}33` }}>
+                <span style={{ color: C.textMid, fontSize: 11 }}>{s.label}</span>
+                <span style={{ color: s.color, fontWeight: 700, fontSize: 13, fontFamily: "monospace" }}>{s.value}</span>
               </div>
             ))}
           </div>
@@ -740,20 +761,53 @@ const PageForecast = () => {
           </AreaChart>
         </ResponsiveContainer>
       </Panel>
-      <Panel>
-        <PanelTitle>12-Month Projected Headcount — All Departments (Dec 2024)</PanelTitle>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={forecastSummary} margin={{ left: -10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-            <XAxis dataKey="dept" tick={{ fill: C.textMid, fontSize: 11 }} />
-            <YAxis tick={{ fill: C.textMid, fontSize: 11 }} domain={[0, 500]} />
-            <Tooltip content={<Tip />} />
-            <Bar dataKey="forecast" name="Projected Headcount" radius={[3,3,0,0]}>
-              {forecastSummary.map((_, i) => <Cell key={i} fill={DEPT_COLORS[i]} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </Panel>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16 }}>
+        <Panel>
+          <PanelTitle>12-Month Projected Headcount — All Departments (Dec 2024)</PanelTitle>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={forecastSummary} margin={{ left: -10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+              <XAxis dataKey="dept" tick={{ fill: C.textMid, fontSize: 11 }} />
+              <YAxis tick={{ fill: C.textMid, fontSize: 11 }} domain={[0, 500]} />
+              <Tooltip content={<Tip />} />
+              <Bar dataKey="forecast" name="Projected Headcount" radius={[3,3,0,0]}>
+                {forecastSummary.map((_, i) => <Cell key={i} fill={DEPT_COLORS[i]} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
+        <Panel>
+          <PanelTitle>Model Performance by Department</PanelTitle>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+            {[
+              { dept: "Investment Management", r2: 0.922, trend: "+2.4%" },
+              { dept: "Portfolio Analytics",   r2: 0.860, trend: "+1.8%" },
+              { dept: "Client Services",        r2: 0.850, trend: "-2.1%" },
+              { dept: "Technology & Data",      r2: 0.786, trend: "+6.1%" },
+              { dept: "Finance & Accounting",   r2: 0.754, trend: "-1.0%" },
+              { dept: "Treasury Operations",    r2: 0.694, trend: "-0.8%" },
+              { dept: "Human Resources",        r2: 0.694, trend: "-1.5%" },
+              { dept: "Risk & Compliance",      r2: 0.423, trend: "+0.2%" },
+            ].map((d, i) => (
+              <div key={d.dept} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ color: C.textMid, fontSize: 10, width: 145, flexShrink: 0 }}>{d.dept.split(" ")[0]}</div>
+                <div style={{ flex: 1, background: C.border, borderRadius: 4, height: 7, overflow: "hidden" }}>
+                  <div style={{ width: `${d.r2 * 100}%`, height: "100%",
+                    background: d.r2 > 0.8 ? C.green : d.r2 > 0.6 ? C.accent : C.red,
+                    borderRadius: 4 }} />
+                </div>
+                <div style={{ color: C.textMid, fontSize: 10, width: 36, fontFamily: "monospace" }}>R²{d.r2.toFixed(2).slice(1)}</div>
+                <div style={{ color: d.trend.startsWith("+") ? C.green : C.red, fontSize: 10, width: 40, fontFamily: "monospace", fontWeight: 600 }}>{d.trend}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 14, background: C.accent + "12", border: `1px solid ${C.accent}33`,
+            borderRadius: 6, padding: "8px 12px", fontSize: 11, color: C.textMid }}>
+            R² = model fit quality. Green ≥ 0.80, Amber ≥ 0.60, Red &lt; 0.60
+          </div>
+        </Panel>
+      </div>
       <div style={{ background: C.green + "12", border: `1px solid ${C.green}33`, borderRadius: 8, padding: "12px 18px", fontSize: 12, color: C.textMid }}>
         <span style={{ color: C.green, fontWeight: 600 }}>📈 Model Info: </span>
         Seasonal Linear Regression with sin/cos seasonality terms. Fit per department (R² range: 0.42–0.92). Forecast band = ±5% of point estimate. Technology & Data projects strongest growth driven by fintech expansion.
@@ -804,7 +858,7 @@ export default function App() {
   const totalActive = Object.values(liveHeadcount).reduce((a,b) => a+b, 0);
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'DM Sans','Helvetica Neue',sans-serif", color: C.text }}>
+    <div style={{ background: C.bg, minHeight: "100vh", width: "100%", maxWidth: "100%", overflowX: "hidden", fontFamily: "'DM Sans','Helvetica Neue',sans-serif", color: C.text }}>
       {/* Header */}
       <div style={{ background: C.panel, borderBottom: `1px solid ${C.border}`, padding: "0 28px",
         display: "flex", alignItems: "center", position: "sticky", top: 0, zIndex: 100 }}>
@@ -855,7 +909,7 @@ export default function App() {
         </div>
       </div>
 
-      <div style={{ padding: "20px 28px 40px" }}>
+      <div style={{ padding: "20px 28px 40px", width: "100%", boxSizing: "border-box" }}>
         {tab === 0 && <PageOverview     deptFilter={deptFilter} onDeptChange={setDeptFilter} liveHeadcount={liveHeadcount} />}
         {tab === 1 && <PageAttrition    deptFilter={deptFilter} onDeptChange={setDeptFilter} liveEvents={liveEvents} />}
         {tab === 2 && <PageCompensation deptFilter={deptFilter} onDeptChange={setDeptFilter} />}
